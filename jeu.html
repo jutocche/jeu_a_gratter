@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Surprise !</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f5d76e;
+    --gold-dark: #b8952a;
+    --bg: #0a0a0a;
+    --card-bg: #13110d;
+    --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-body: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-family: var(--font-body);
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1.5px 1.5px at 15% 25%, rgba(212,175,55,0.3), transparent),
+      radial-gradient(1px 1px at 75% 65%, rgba(212,175,55,0.2), transparent),
+      radial-gradient(1px 1px at 45% 85%, rgba(212,175,55,0.15), transparent),
+      radial-gradient(1.5px 1.5px at 85% 15%, rgba(212,175,55,0.25), transparent),
+      radial-gradient(1px 1px at 55% 45%, rgba(212,175,55,0.12), transparent);
+    animation: shimmer 6s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes shimmer {
+    0% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  .card-wrapper {
+    position: relative;
+    z-index: 1;
+    animation: entrance 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+
+  @keyframes entrance {
+    from { opacity: 0; transform: scale(0.92) translateY(24px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .card {
+    width: 400px;
+    max-width: 88vw;
+    background: linear-gradient(160deg, #1a1610, var(--card-bg));
+    border-radius: 20px;
+    padding: 36px 28px;
+    position: relative;
+    box-shadow:
+      0 0 0 1px rgba(212,175,55,0.12),
+      0 30px 70px rgba(0,0,0,0.5),
+      0 0 60px rgba(212,175,55,0.04);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 1.5px;
+    background: linear-gradient(160deg, rgba(212,175,55,0.5), rgba(212,175,55,0.03), rgba(212,175,55,0.25));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .corner { position: absolute; width: 40px; height: 40px; pointer-events: none; }
+  .corner::before, .corner::after { content: ''; position: absolute; background: rgba(212,175,55,0.25); }
+  .corner.tl { top: 14px; left: 14px; }
+  .corner.tl::before { top: 0; left: 0; width: 20px; height: 1.5px; }
+  .corner.tl::after  { top: 0; left: 0; width: 1.5px; height: 20px; }
+  .corner.tr { top: 14px; right: 14px; }
+  .corner.tr::before { top: 0; right: 0; width: 20px; height: 1.5px; }
+  .corner.tr::after  { top: 0; right: 0; width: 1.5px; height: 20px; }
+  .corner.bl { bottom: 14px; left: 14px; }
+  .corner.bl::before { bottom: 0; left: 0; width: 20px; height: 1.5px; }
+  .corner.bl::after  { bottom: 0; left: 0; width: 1.5px; height: 20px; }
+  .corner.br { bottom: 14px; right: 14px; }
+  .corner.br::before { bottom: 0; right: 0; width: 20px; height: 1.5px; }
+  .corner.br::after  { bottom: 0; right: 0; width: 1.5px; height: 20px; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .header h1 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: rgba(212,175,55,0.85);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .header .sep {
+    margin-top: 10px;
+    color: rgba(212,175,55,0.4);
+    font-size: 0.9rem;
+    letter-spacing: 1em;
+  }
+
+  .scratch-zone {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(212,175,55,0.15);
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .secret {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #1c1710, #0e0c08);
+    text-align: center;
+    padding: 16px;
+  }
+
+  .secret .emoji {
+    font-size: 2.8rem;
+    margin-bottom: 8px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .secret .msg {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.3;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-light), var(--gold-dark));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.6s 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .secret .tag {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: rgba(212,175,55,0.4);
+    letter-spacing: 0.12em;
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.6s 0.3s ease;
+  }
+
+  .secret.show .emoji { opacity: 1; transform: scale(1); }
+  .secret.show .msg   { opacity: 1; transform: translateY(0); animation: goldShift 3s ease-in-out infinite alternate; }
+  .secret.show .tag   { opacity: 1; }
+
+  @keyframes goldShift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  #scratch {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+  }
+  #scratch:active { cursor: grabbing; }
+
+  .footer {
+    text-align: center;
+    margin-top: 22px;
+    transition: opacity 0.6s ease;
+  }
+  .footer.hide { opacity: 0; pointer-events: none; }
+
+  .footer p {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: rgba(212,175,55,0.45);
+    font-style: italic;
+    letter-spacing: 0.06em;
+  }
+
+  .footer .wiggle {
+    display: inline-block;
+    animation: wiggle 1.8s ease-in-out infinite;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25%  { transform: translateX(5px) rotate(5deg); }
+    75%  { transform: translateX(-5px) rotate(-5deg); }
+  }
+
+  #confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  @media (max-width: 440px) {
+    .card { padding: 28px 20px; }
+    .header h1 { font-size: 1.25rem; }
+    .scratch-zone { height: 170px; }
+    .secret .msg { font-size: 1.5rem; }
+    .secret .emoji { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<div class="card-wrapper">
+  <div class="card">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="header">
+      <h1>Une surprise t'attend</h1>
+      <div class="sep">&#10022; &#10022; &#10022;</div>
+    </div>
+
+    <div class="scratch-zone" id="zone">
+      <div class="secret" id="secret">
+        <div class="emoji">&#x1F476;&#x1F37C;</div>
+        <div class="msg">Tu vas &ecirc;tre<br>tonton&nbsp;!</div>
+        <div class="tag">&#10022; F&eacute;licitations &#10022;</div>
+      </div>
+      <canvas id="scratch"></canvas>
+    </div>
+
+    <div class="footer" id="footer">
+      <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var canvas = document.getElementById('scratch');
+  var zone = document.getElementById('zone');
+  var secret = document.getElementById('secret');
+  var footer = document.getElementById('footer');
+  var confettiEl = document.getElementById('confetti');
+  var ctx = canvas.getContext('2d');
+  var confettiCtx = confettiEl.getContext('2d');
+
+  var drawing = false;
+  var revealed = false;
+  var prevX = null;
+  var prevY = null;
+
+  function setup() {
+    var w = zone.offsetWidth;
+    var h = zone.offsetHeight;
+    if (w === 0 || h === 0) return;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Gold gradient
+    var g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, '#b8952a');
+    g.addColorStop(0.3, '#f5d76e');
+    g.addColorStop(0.5, '#d4af37');
+    g.addColorStop(0.7, '#e8c84a');
+    g.addColorStop(1, '#c5a028');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    // Grain texture
+    var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var d = img.data;
+    for (var i = 0; i < d.length; i += 4) {
+      var n = (Math.random() - 0.5) * 28;
+      d[i] += n; d[i+1] += n; d[i+2] += n;
+    }
+    ctx.putImageData(img, 0, 0);
+
+    // Pattern text
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = '#fff';
+    ctx.font = '13px Georgia, serif';
+    ctx.textAlign = 'center';
+    for (var y = 24; y < h; y += 26) {
+      for (var x = 0; x < w; x += 110) {
+        ctx.fillText('\u2726 SURPRISE \u2726', x + ((Math.floor(y / 26)) % 2 ? 55 : 0), y);
+      }
+    }
+    ctx.restore();
+
+    // Center text
+    ctx.save();
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#1a1610';
+    ctx.font = 'bold 18px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('\uD83E\uDE99  Gratte ici  \uD83E\uDE99', w / 2, h / 2);
+    ctx.restore();
+  }
+
+  function coords(e) {
+    var r = canvas.getBoundingClientRect();
+    var t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+
+  function scratchAt(x, y) {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 24, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (prevX !== null) {
+      ctx.lineWidth = 48;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    prevX = x;
+    prevY = y;
+  }
+
+  function checkPercent() {
+    if (revealed) return;
+    var w = zone.offsetWidth;
+    var h = zone.offsetHeight;
+    var dpr = window.devicePixelRatio || 1;
+    var data = ctx.getImageData(0, 0, w * dpr, h * dpr).data;
+    var clear = 0;
+    var total = 0;
+    for (var i = 3; i < data.length; i += 16) {
+      total++;
+      if (data[i] < 128) clear++;
+    }
+    if (clear / total > 0.40) reveal();
+  }
+
+  function reveal() {
+    revealed = true;
+    canvas.style.transition = 'opacity 0.7s ease';
+    canvas.style.opacity = '0';
+    secret.classList.add('show');
+    footer.classList.add('hide');
+    setTimeout(function() { canvas.style.display = 'none'; }, 700);
+    fireConfetti();
+  }
+
+  function onStart(e) { e.preventDefault(); drawing = true; var p = coords(e); prevX = p.x; prevY = p.y; scratchAt(p.x, p.y); }
+  function onMove(e)  { e.preventDefault(); if (!drawing) return; var p = coords(e); scratchAt(p.x, p.y); }
+  function onEnd(e)   { e.preventDefault(); drawing = false; prevX = prevY = null; checkPercent(); }
+
+  canvas.addEventListener('mousedown', onStart);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onEnd);
+  canvas.addEventListener('mouseleave', onEnd);
+  canvas.addEventListener('touchstart', onStart, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onEnd, { passive: false });
+
+  function fireConfetti() {
+    confettiEl.width = window.innerWidth;
+    confettiEl.height = window.innerHeight;
+
+    var colors = ['#f5d76e','#d4af37','#c5a028','#fff8dc','#e8c84a','#ffffff','#b8952a'];
+    var pieces = [];
+    for (var i = 0; i < 100; i++) {
+      pieces.push({
+        x: Math.random() * confettiEl.width,
+        y: -10 - Math.random() * 250,
+        w: 3 + Math.random() * 5,
+        h: 7 + Math.random() * 9,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        r: Math.random() * 360,
+        rs: (Math.random() - 0.5) * 8,
+        vx: (Math.random() - 0.5) * 3.5,
+        vy: 2 + Math.random() * 3.5,
+        o: 0.8 + Math.random() * 0.2
+      });
+    }
+
+    var t = 0;
+    function loop() {
+      confettiCtx.clearRect(0, 0, confettiEl.width, confettiEl.height);
+      var alive = false;
+      for (var i = 0; i < pieces.length; i++) {
+        var p = pieces[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.04;
+        p.r += p.rs;
+        if (t > 50) p.o -= 0.007;
+        if (p.o > 0 && p.y < confettiEl.height + 40) {
+          alive = true;
+          confettiCtx.save();
+          confettiCtx.translate(p.x, p.y);
+          confettiCtx.rotate(p.r * Math.PI / 180);
+          confettiCtx.globalAlpha = Math.max(0, p.o);
+          confettiCtx.fillStyle = p.c;
+          confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          confettiCtx.restore();
+        }
+      }
+      t++;
+      if (alive) requestAnimationFrame(loop);
+    }
+    loop();
+  }
+
+  // Init - wait for DOM to be fully ready
+  if (document.readyState === 'complete') {
+    setup();
+  } else {
+    window.addEventListener('load', setup);
+  }
+  window.addEventListener('resize', function() { if (!revealed) setup(); });
+})();
+</script>
+
+</body>
+</html>
