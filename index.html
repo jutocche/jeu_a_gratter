@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Surprise !</title>
+<title>Jeu &agrave; gratter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -20,10 +20,7 @@
     --font-body: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   }
 
-  html, body {
-    width: 100%;
-    height: 100%;
-  }
+  html, body { width: 100%; height: 100%; }
 
   body {
     min-height: 100vh;
@@ -121,13 +118,12 @@
     font-size: 1.5rem;
     font-weight: 400;
     color: rgba(212,175,55,0.85);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+    letter-spacing: 0.12em;
   }
 
   .header .sep {
     margin-top: 10px;
-    color: rgba(212,175,55,0.4);
+    color: rgba(212,175,55,0.3);
     font-size: 0.9rem;
     letter-spacing: 1em;
   }
@@ -135,7 +131,7 @@
   .scratch-zone {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 250px;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: inset 0 0 0 1px rgba(212,175,55,0.15);
@@ -144,54 +140,56 @@
     touch-action: none;
   }
 
-  .secret {
+  .secret-photo {
     position: absolute;
     inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at center, #1c1710, #0e0c08);
-    text-align: center;
-    padding: 16px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0e0c08;
   }
 
-  .secret .emoji {
-    font-size: 2.8rem;
-    margin-bottom: 8px;
+  .secret-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     opacity: 0;
-    transform: scale(0.5);
-    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scale(1.05);
+    transition: opacity 0.6s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .secret .msg {
+  .secret-photo.show img {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .photo-caption {
+    text-align: center;
+    margin-top: 16px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.5s 0.3s ease;
+  }
+
+  .photo-caption.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .photo-caption p {
     font-family: var(--font-display);
-    font-size: 1.9rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.4;
     background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-light), var(--gold-dark));
     background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.6s 0.15s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .secret .tag {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    color: rgba(212,175,55,0.4);
-    letter-spacing: 0.12em;
-    margin-top: 6px;
-    opacity: 0;
-    transition: opacity 0.6s 0.3s ease;
+  .photo-caption.show p {
+    animation: goldShift 3s ease-in-out infinite alternate;
   }
-
-  .secret.show .emoji { opacity: 1; transform: scale(1); }
-  .secret.show .msg   { opacity: 1; transform: translateY(0); animation: goldShift 3s ease-in-out infinite alternate; }
-  .secret.show .tag   { opacity: 1; }
 
   @keyframes goldShift {
     0%   { background-position: 0% 50%; }
@@ -207,14 +205,14 @@
   }
   #scratch:active { cursor: grabbing; }
 
-  .footer {
+  .footer-hint {
     text-align: center;
-    margin-top: 22px;
+    margin-top: 20px;
     transition: opacity 0.6s ease;
   }
-  .footer.hide { opacity: 0; pointer-events: none; }
+  .footer-hint.hide { opacity: 0; pointer-events: none; }
 
-  .footer p {
+  .footer-hint p {
     font-family: var(--font-body);
     font-size: 1rem;
     color: rgba(212,175,55,0.45);
@@ -222,7 +220,7 @@
     letter-spacing: 0.06em;
   }
 
-  .footer .wiggle {
+  .footer-hint .wiggle {
     display: inline-block;
     animation: wiggle 1.8s ease-in-out infinite;
   }
@@ -243,9 +241,8 @@
   @media (max-width: 440px) {
     .card { padding: 28px 20px; }
     .header h1 { font-size: 1.25rem; }
-    .scratch-zone { height: 170px; }
-    .secret .msg { font-size: 1.5rem; }
-    .secret .emoji { font-size: 2.2rem; }
+    .scratch-zone { height: 210px; }
+    .photo-caption p { font-size: 1.25rem; }
   }
 </style>
 </head>
@@ -255,36 +252,39 @@
 
 <div class="card-wrapper">
   <div class="card">
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
 
     <div class="header">
-      <h1>Une surprise t'attend</h1>
+      <h1>Gratte pour découvrir une surprise...</h1>
       <div class="sep">&#10022; &#10022; &#10022;</div>
     </div>
 
     <div class="scratch-zone" id="zone">
-      <div class="secret" id="secret">
-        <div class="emoji">&#x1F476;&#x1F37C;</div>
-        <div class="msg">Tu vas &ecirc;tre<br>tonton&nbsp;!</div>
-        <div class="tag">&#10022; F&eacute;licitations &#10022;</div>
+      <div class="secret-photo" id="photo">
+        <img src="images/image4.jpg" alt="Surprise">
       </div>
       <canvas id="scratch"></canvas>
     </div>
 
-    <div class="footer" id="footer">
+    <div class="photo-caption" id="caption">
+      <p>&#x1F476; C'est gagn&eacute;, un b&eacute;b&eacute; arrive&nbsp;!!</p>
+    </div>
+
+    <div class="footer-hint" id="footer">
       <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
     </div>
   </div>
 </div>
 
+<audio id="revealMusic" preload="auto" src="audio/musique.mp3"></audio>
+
 <script>
 (function() {
   var canvas = document.getElementById('scratch');
   var zone = document.getElementById('zone');
-  var secret = document.getElementById('secret');
+  var photo = document.getElementById('photo');
+  var caption = document.getElementById('caption');
   var footer = document.getElementById('footer');
   var confettiEl = document.getElementById('confetti');
   var ctx = canvas.getContext('2d');
@@ -307,7 +307,6 @@
     canvas.style.height = h + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Gold gradient
     var g = ctx.createLinearGradient(0, 0, w, h);
     g.addColorStop(0, '#b8952a');
     g.addColorStop(0.3, '#f5d76e');
@@ -317,7 +316,6 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    // Grain texture
     var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
     var d = img.data;
     for (var i = 0; i < d.length; i += 4) {
@@ -326,7 +324,6 @@
     }
     ctx.putImageData(img, 0, 0);
 
-    // Pattern text
     ctx.save();
     ctx.globalAlpha = 0.12;
     ctx.fillStyle = '#fff';
@@ -339,7 +336,6 @@
     }
     ctx.restore();
 
-    // Center text
     ctx.save();
     ctx.globalAlpha = 0.3;
     ctx.fillStyle = '#1a1610';
@@ -361,7 +357,6 @@
     ctx.beginPath();
     ctx.arc(x, y, 24, 0, Math.PI * 2);
     ctx.fill();
-
     if (prevX !== null) {
       ctx.lineWidth = 48;
       ctx.lineCap = 'round';
@@ -393,10 +388,12 @@
     revealed = true;
     canvas.style.transition = 'opacity 0.7s ease';
     canvas.style.opacity = '0';
-    secret.classList.add('show');
+    photo.classList.add('show');
+    caption.classList.add('show');
     footer.classList.add('hide');
     setTimeout(function() { canvas.style.display = 'none'; }, 700);
     fireConfetti();
+    playRevealMusic();
   }
 
   function onStart(e) { e.preventDefault(); drawing = true; var p = coords(e); prevX = p.x; prevY = p.y; scratchAt(p.x, p.y); }
@@ -411,24 +408,51 @@
   canvas.addEventListener('touchmove', onMove, { passive: false });
   canvas.addEventListener('touchend', onEnd, { passive: false });
 
+  // Music
+  function playRevealMusic() {
+    var audio = document.getElementById('revealMusic');
+    audio.volume = 0;
+    audio.play().then(function() {
+      var fadeIn = setInterval(function() {
+        if (audio.volume < 0.9) {
+          audio.volume = Math.min(1, audio.volume + 0.05);
+        } else {
+          clearInterval(fadeIn);
+        }
+      }, 50);
+
+      setTimeout(function() {
+        var fadeOut = setInterval(function() {
+          if (audio.volume > 0.05) {
+            audio.volume = Math.max(0, audio.volume - 0.03);
+          } else {
+            audio.pause();
+            clearInterval(fadeOut);
+          }
+        }, 80);
+      }, 20000);
+    }).catch(function() {});
+  }
+
+  // Confetti
   function fireConfetti() {
     confettiEl.width = window.innerWidth;
     confettiEl.height = window.innerHeight;
 
-    var colors = ['#f5d76e','#d4af37','#c5a028','#fff8dc','#e8c84a','#ffffff','#b8952a'];
+    var colors = ['#f5d76e','#d4af37','#c5a028','#fff8dc','#e8c84a','#ffffff','#b8952a','#ff69b4','#87ceeb'];
     var pieces = [];
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 200; i++) {
       pieces.push({
         x: Math.random() * confettiEl.width,
-        y: -10 - Math.random() * 250,
-        w: 3 + Math.random() * 5,
-        h: 7 + Math.random() * 9,
+        y: -10 - Math.random() * 400,
+        w: 3 + Math.random() * 7,
+        h: 7 + Math.random() * 12,
         c: colors[Math.floor(Math.random() * colors.length)],
         r: Math.random() * 360,
-        rs: (Math.random() - 0.5) * 8,
-        vx: (Math.random() - 0.5) * 3.5,
-        vy: 2 + Math.random() * 3.5,
-        o: 0.8 + Math.random() * 0.2
+        rs: (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 5,
+        vy: 2 + Math.random() * 5,
+        o: 0.85 + Math.random() * 0.15
       });
     }
 
@@ -442,7 +466,7 @@
         p.y += p.vy;
         p.vy += 0.04;
         p.r += p.rs;
-        if (t > 50) p.o -= 0.007;
+        if (t > 80) p.o -= 0.005;
         if (p.o > 0 && p.y < confettiEl.height + 40) {
           alive = true;
           confettiCtx.save();
@@ -460,7 +484,6 @@
     loop();
   }
 
-  // Init - wait for DOM to be fully ready
   if (document.readyState === 'complete') {
     setup();
   } else {
