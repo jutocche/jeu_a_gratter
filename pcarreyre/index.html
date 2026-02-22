@@ -244,6 +244,41 @@
   .secret-emoji.show .symbol:nth-child(2) { opacity: 1; transform: scale(1) rotate(0deg); transition-delay: 0.3s; }
   .secret-emoji.show .symbol:nth-child(3) { opacity: 1; transform: scale(1) rotate(0deg); transition-delay: 0.5s; }
 
+  .secret-emoji .reveal-name {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-light), var(--gold-dark));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .secret-emoji.show .reveal-name {
+    opacity: 1;
+    transform: scale(1);
+    animation: goldShift 3s ease-in-out infinite alternate;
+  }
+
+  .secret-emoji .reveal-sub {
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    color: rgba(212,175,55,0.5);
+    margin-top: 8px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.5s 0.3s ease;
+  }
+
+  .secret-emoji.show .reveal-sub {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
   .secret-emoji .perdu-text {
     position: absolute;
     bottom: 24px;
@@ -277,6 +312,19 @@
   .photo-caption.show {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  .photo-caption .caption-emojis {
+    font-size: 2.5rem;
+    margin-bottom: 6px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.5s 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .photo-caption.show .caption-emojis {
+    opacity: 1;
+    transform: scale(1);
   }
 
   .photo-caption p {
@@ -388,7 +436,7 @@
 
 <!-- Page Title -->
 <div class="page-title">
-  <h1>Jeu &agrave; gratter</h1>
+  <h1>Jeux &agrave; gratter</h1>
   <div class="sep">&#10022; &#10022; &#10022;</div>
 </div>
 
@@ -403,10 +451,15 @@
       <div class="sep">&#10022; &#10022; &#10022;</div>
     </div>
     <div class="scratch-zone" id="zone1">
-      <div class="secret-photo" id="secret1">
-        <img src="images/image1.jpg" alt="Surprise 1">
+      <div class="secret-emoji" id="secret1">
+        <span class="reveal-name">Patrice et Suzanne !!!</span>
+        <span class="reveal-sub">Et beh oui c'est vous&nbsp;!</span>
       </div>
       <canvas class="scratch-canvas" id="scratch1"></canvas>
+    </div>
+    <div class="photo-caption" id="caption1">
+      <p>Bonne r&eacute;ponse ! Tu peux passer &agrave; la suite en dessous</p>
+      <div class="caption-emojis">&#x1F447;</div>
     </div>
     <div class="footer-hint" id="footer1">
       <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
@@ -417,7 +470,7 @@
 <div class="scroll-arrow">&#x25BC;</div>
 
 <!-- CARD 2 -->
-<div class="card-wrapper" id="card2-wrapper">
+<div class="card-wrapper" id="card2-wrapper">)
   <div class="card">
     <div class="card-number">2</div>
     <div class="corner tl"></div><div class="corner tr"></div>
@@ -433,7 +486,9 @@
       <canvas class="scratch-canvas" id="scratch2"></canvas>
     </div>
     <div class="photo-caption" id="caption2">
-      <p>TOUCKA</p>
+      <p>TOUCKA (bien jou&eacute !)</p>
+      <p>Carte suivante</p>
+      <div class="caption-emojis">&#x1F447;</div>
     </div>
     <div class="footer-hint" id="footer2">
       <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
@@ -462,6 +517,10 @@
       </div>
       <canvas class="scratch-canvas" id="scratch3"></canvas>
     </div>
+    <div class="photo-caption" id="caption3">
+      <p>Derni&egrave;re chance</p>
+      <div class="caption-emojis">&#x1F447;</div>
+    </div>
     <div class="footer-hint" id="footer3">
       <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
     </div>
@@ -477,7 +536,7 @@
     <div class="corner tl"></div><div class="corner tr"></div>
     <div class="corner bl"></div><div class="corner br"></div>
     <div class="header">
-      <h2>Surprise...</h2>
+      <h2>Le grand final... (Activez le son)</h2>
       <div class="sep">&#10022; &#10022; &#10022;</div>
     </div>
     <div class="scratch-zone" id="zone4">
@@ -486,8 +545,9 @@
       </div>
       <canvas class="scratch-canvas" id="scratch4"></canvas>
     </div>
-    <div class="photo-caption big-reveal" id="caption4">
-      <p>&#x1F476; C'est gagn&eacute;, un b&eacute;b&eacute; arrive&nbsp;!!</p>
+    <div class="photo-caption" id="caption4">
+      <div class="caption-emojis">&#x1F476;&#x1F37C;</div>
+      <p>C'est gagn&eacute;, un b&eacute;b&eacute; arrive&nbsp;!!</p>
     </div>
     <div class="footer-hint" id="footer4">
       <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
@@ -517,9 +577,9 @@
 
   // Cards config: hasCaption determines if there's a text caption to reveal
   var cardsConfig = [
-    { id: 1, hasCaption: false },
+    { id: 1, hasCaption: true },
     { id: 2, hasCaption: true },
-    { id: 3, hasCaption: false },
+    { id: 3, hasCaption: true },
     { id: 4, hasCaption: true, isFinal: true }
   ];
 

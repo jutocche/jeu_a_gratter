@@ -175,6 +175,19 @@
     transform: translateY(0);
   }
 
+  .photo-caption .caption-emojis {
+    font-size: 2.5rem;
+    margin-bottom: 6px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.5s 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .photo-caption.show .caption-emojis {
+    opacity: 1;
+    transform: scale(1);
+  }
+
   .photo-caption p {
     font-family: var(--font-display);
     font-size: 1.5rem;
@@ -256,7 +269,7 @@
     <div class="corner bl"></div><div class="corner br"></div>
 
     <div class="header">
-      <h1>Gratte pour découvrir une surprise...</h1>
+      <h1>Activez le son et grattez pour découvrir la nouvelle...</h1>
       <div class="sep">&#10022; &#10022; &#10022;</div>
     </div>
 
@@ -268,11 +281,12 @@
     </div>
 
     <div class="photo-caption" id="caption">
-      <p>&#x1F476; C'est gagn&eacute;, un b&eacute;b&eacute; arrive&nbsp;!!</p>
+      <div class="caption-emojis">&#x1F476;&#x1F37C;</div>
+      <p>C'est gagn&eacute;, un b&eacute;b&eacute; arrive&nbsp;!!</p>
     </div>
 
     <div class="footer-hint" id="footer">
-      <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
+      <p><span class="wiggle">&#x1F446;</span> Grattez pour d&eacute;couvrir</p>
     </div>
   </div>
 </div>
