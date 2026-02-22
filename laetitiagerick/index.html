@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Jeu &agrave; gratter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #d4af37;
+    --gold-light: #f5d76e;
+    --gold-dark: #b8952a;
+    --bg: #0a0a0a;
+    --card-bg: #13110d;
+    --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-body: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg);
+    font-family: var(--font-body);
+    padding: 60px 16px;
+    gap: 50px;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(1.5px 1.5px at 15% 25%, rgba(212,175,55,0.3), transparent),
+      radial-gradient(1px 1px at 75% 65%, rgba(212,175,55,0.2), transparent),
+      radial-gradient(1px 1px at 45% 85%, rgba(212,175,55,0.15), transparent),
+      radial-gradient(1.5px 1.5px at 85% 15%, rgba(212,175,55,0.25), transparent),
+      radial-gradient(1px 1px at 55% 45%, rgba(212,175,55,0.12), transparent);
+    animation: shimmer 6s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes shimmer {
+    0% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  /* Page title */
+  .page-title {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    animation: entrance 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+  }
+
+  .page-title h1 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 400;
+    color: rgba(212,175,55,0.85);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .page-title .sep {
+    margin-top: 12px;
+    color: rgba(212,175,55,0.3);
+    font-size: 0.9rem;
+    letter-spacing: 1em;
+  }
+
+  .card-wrapper {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes entrance {
+    from { opacity: 0; transform: scale(0.92) translateY(24px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .card {
+    width: 400px;
+    max-width: 88vw;
+    background: linear-gradient(160deg, #1a1610, var(--card-bg));
+    border-radius: 20px;
+    padding: 36px 28px;
+    position: relative;
+    box-shadow:
+      0 0 0 1px rgba(212,175,55,0.12),
+      0 30px 70px rgba(0,0,0,0.5),
+      0 0 60px rgba(212,175,55,0.04);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 1.5px;
+    background: linear-gradient(160deg, rgba(212,175,55,0.5), rgba(212,175,55,0.03), rgba(212,175,55,0.25));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .corner { position: absolute; width: 40px; height: 40px; pointer-events: none; }
+  .corner::before, .corner::after { content: ''; position: absolute; background: rgba(212,175,55,0.25); }
+  .corner.tl { top: 14px; left: 14px; }
+  .corner.tl::before { top: 0; left: 0; width: 20px; height: 1.5px; }
+  .corner.tl::after  { top: 0; left: 0; width: 1.5px; height: 20px; }
+  .corner.tr { top: 14px; right: 14px; }
+  .corner.tr::before { top: 0; right: 0; width: 20px; height: 1.5px; }
+  .corner.tr::after  { top: 0; right: 0; width: 1.5px; height: 20px; }
+  .corner.bl { bottom: 14px; left: 14px; }
+  .corner.bl::before { bottom: 0; left: 0; width: 20px; height: 1.5px; }
+  .corner.bl::after  { bottom: 0; left: 0; width: 1.5px; height: 20px; }
+  .corner.br { bottom: 14px; right: 14px; }
+  .corner.br::before { bottom: 0; right: 0; width: 20px; height: 1.5px; }
+  .corner.br::after  { bottom: 0; right: 0; width: 1.5px; height: 20px; }
+
+  .card-number {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #0a0a0a;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+    z-index: 2;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .header h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: rgba(212,175,55,0.85);
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+  }
+
+  .header .sep {
+    margin-top: 8px;
+    color: rgba(212,175,55,0.3);
+    font-size: 0.8rem;
+    letter-spacing: 0.8em;
+  }
+
+  .scratch-zone {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(212,175,55,0.15);
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+  }
+
+  /* Photo layer */
+  .secret-photo {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0e0c08;
+  }
+
+  .secret-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 0.6s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .secret-photo.show img {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* Emoji-only secret (card 3) */
+  .secret-emoji {
+    padding: 12px;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    background: radial-gradient(ellipse at center, #1c1710, #0e0c08);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .secret-emoji.show {
+    opacity: 1;
+  }
+
+  .secret-emoji .symbol {
+    font-size: 3.5rem;
+    opacity: 0;
+    transform: scale(0.3) rotate(-20deg);
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .secret-emoji.show .symbol:nth-child(1) { opacity: 1; transform: scale(1) rotate(0deg); transition-delay: 0.1s; }
+  .secret-emoji.show .symbol:nth-child(2) { opacity: 1; transform: scale(1) rotate(0deg); transition-delay: 0.3s; }
+  .secret-emoji.show .symbol:nth-child(3) { opacity: 1; transform: scale(1) rotate(0deg); transition-delay: 0.5s; }
+
+  .secret-emoji .reveal-name {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-light), var(--gold-dark));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .secret-emoji.show .reveal-name {
+    opacity: 1;
+    transform: scale(1);
+    animation: goldShift 3s ease-in-out infinite alternate;
+  }
+
+  .secret-emoji .reveal-sub {
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    color: rgba(212,175,55,0.5);
+    margin-top: 8px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.5s 0.3s ease;
+  }
+
+  .secret-emoji.show .reveal-sub {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .secret-emoji .perdu-text {
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: rgba(212,175,55,0.7);
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.5s 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .secret-emoji.show .perdu-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Caption below */
+  .photo-caption {
+    text-align: center;
+    margin-top: 14px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: all 0.5s 0.3s ease;
+  }
+
+  .photo-caption.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .photo-caption .caption-emojis {
+    font-size: 2.5rem;
+    margin-bottom: 6px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.5s 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .photo-caption.show .caption-emojis {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .photo-caption p {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-light), var(--gold-dark));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.4;
+  }
+
+  .photo-caption.show p {
+    animation: goldShift 3s ease-in-out infinite alternate;
+  }
+
+  /* Big reveal caption for card 4 */
+  .photo-caption.big-reveal p {
+    font-size: 1.5rem;
+  }
+
+  .photo-caption .tag {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: rgba(212,175,55,0.4);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+
+  @keyframes goldShift {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+
+  .scratch-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+  }
+  .scratch-canvas:active { cursor: grabbing; }
+
+  .footer-hint {
+    text-align: center;
+    margin-top: 18px;
+    transition: opacity 0.6s ease;
+  }
+  .footer-hint.hide { opacity: 0; pointer-events: none; }
+
+  .footer-hint p {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: rgba(212,175,55,0.4);
+    font-style: italic;
+    letter-spacing: 0.06em;
+  }
+
+  .footer-hint .wiggle {
+    display: inline-block;
+    animation: wiggle 1.8s ease-in-out infinite;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25%  { transform: translateX(5px) rotate(5deg); }
+    75%  { transform: translateX(-5px) rotate(-5deg); }
+  }
+
+  .scroll-arrow {
+    position: relative;
+    z-index: 1;
+    color: rgba(212,175,55,0.25);
+    font-size: 1.5rem;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  #confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .bottom-spacer { height: 40px; }
+
+  @media (max-width: 440px) {
+    body { padding: 40px 12px; gap: 40px; }
+    .card { padding: 28px 20px; }
+    .header h2 { font-size: 1.1rem; }
+    .scratch-zone { height: 210px; }
+    .page-title h1 { font-size: 1.5rem; }
+    .photo-caption p { font-size: 1.1rem; }
+    .photo-caption.big-reveal p { font-size: 1.25rem; }
+    .secret-emoji .symbol { font-size: 2.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<!-- Page Title -->
+<div class="page-title">
+  <h1>Jeux &agrave; gratter</h1>
+  <div class="sep">&#10022; &#10022; &#10022;</div>
+</div>
+
+<!-- CARD 1 -->
+<div class="card-wrapper" id="card1-wrapper">
+  <div class="card">
+    <div class="card-number">1</div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="header">
+      <h2>&Agrave; qui est destin&eacute; ce jeu &agrave; gratter&nbsp;?</h2>
+      <div class="sep">&#10022; &#10022; &#10022;</div>
+    </div>
+    <div class="scratch-zone" id="zone1">
+      <div class="secret-emoji" id="secret1">
+        <span class="reveal-name">La&euml;titia et Gerick</span>
+        <span class="reveal-sub">Et beh oui c'est vous&nbsp;!</span>
+      </div>
+      <canvas class="scratch-canvas" id="scratch1"></canvas>
+    </div>
+    <div class="photo-caption" id="caption1">
+      <p>Bonne r&eacute;ponse ! Tu peux passer &agrave; la suite en dessous</p>
+      <div class="caption-emojis">&#x1F447;</div>
+    </div>
+    <div class="footer-hint" id="footer1">
+      <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-arrow">&#x25BC;</div>
+
+<!-- CARD 2 -->
+<div class="card-wrapper" id="card2-wrapper">)
+  <div class="card">
+    <div class="card-number">2</div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="header">
+      <h2>Quel mot forment les lettres C O K T A U&nbsp;?</h2>
+      <div class="sep">&#10022; &#10022; &#10022;</div>
+    </div>
+    <div class="scratch-zone" id="zone2">
+      <div class="secret-photo" id="secret2">
+        <img src="images/image2.jpg" alt="Surprise 2">
+      </div>
+      <canvas class="scratch-canvas" id="scratch2"></canvas>
+    </div>
+    <div class="photo-caption" id="caption2">
+      <p>TOUCKA (bien jou&eacute !)</p>
+      <p>Carte suivante</p>
+      <div class="caption-emojis">&#x1F447;</div>
+    </div>
+    <div class="footer-hint" id="footer2">
+      <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-arrow">&#x25BC;</div>
+
+<!-- CARD 3 -->
+<div class="card-wrapper" id="card3-wrapper">
+  <div class="card">
+    <div class="card-number">3</div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="header">
+      <h2>Si tu d&eacute;couvres 3 fois le m&ecirc;me symbole, c'est gagn&eacute;.</h2>
+      <div class="sep">&#10022; &#10022; &#10022;</div>
+    </div>
+    <div class="scratch-zone" id="zone3">
+      <div class="secret-emoji" id="secret3">
+        <span class="symbol">&#x1F37E;</span>
+        <span class="symbol">&#x2600;&#xFE0F;</span>
+        <span class="symbol cigogne-icon">&#x1F9A9;</span>
+        <span class="perdu-text">Perdu&nbsp;!</span>
+      </div>
+      <canvas class="scratch-canvas" id="scratch3"></canvas>
+    </div>
+    <div class="photo-caption" id="caption3">
+      <p>Derni&egrave;re chance</p>
+      <div class="caption-emojis">&#x1F447;</div>
+    </div>
+    <div class="footer-hint" id="footer3">
+      <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
+    </div>
+  </div>
+</div>
+
+<div class="scroll-arrow">&#x25BC;</div>
+
+<!-- CARD 4 — THE BIG REVEAL -->
+<div class="card-wrapper" id="card4-wrapper">
+  <div class="card">
+    <div class="card-number">4</div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="header">
+      <h2>Le grand final... (Activez le son)</h2>
+      <div class="sep">&#10022; &#10022; &#10022;</div>
+    </div>
+    <div class="scratch-zone" id="zone4">
+      <div class="secret-photo" id="secret4">
+        <img src="images/image4.jpg" alt="Surprise finale">
+      </div>
+      <canvas class="scratch-canvas" id="scratch4"></canvas>
+    </div>
+    <div class="photo-caption" id="caption4">
+      <div class="caption-emojis">&#x1F476;&#x1F37C;</div>
+      <p>C'est gagn&eacute;, un b&eacute;b&eacute; arrive&nbsp;!!</p>
+    </div>
+    <div class="footer-hint" id="footer4">
+      <p><span class="wiggle">&#x1F446;</span> Gratte pour d&eacute;couvrir</p>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-spacer"></div>
+
+<audio id="revealMusic" preload="auto" src="audio/musique.mp3"></audio>
+
+<script>
+(function() {
+  var confettiEl = document.getElementById('confetti');
+  var confettiCtx = confettiEl.getContext('2d');
+  var confettiFired = false;
+
+  // Scroll reveal
+  var wrappers = document.querySelectorAll('.card-wrapper');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.2 });
+  wrappers.forEach(function(w) { observer.observe(w); });
+  setTimeout(function() { wrappers[0].classList.add('visible'); }, 300);
+
+  // Cards config: hasCaption determines if there's a text caption to reveal
+  var cardsConfig = [
+    { id: 1, hasCaption: true },
+    { id: 2, hasCaption: true },
+    { id: 3, hasCaption: true },
+    { id: 4, hasCaption: true, isFinal: true }
+  ];
+
+  cardsConfig.forEach(function(card) {
+    var canvas = document.getElementById('scratch' + card.id);
+    var zone = document.getElementById('zone' + card.id);
+    var secret = document.getElementById('secret' + card.id);
+    var caption = card.hasCaption ? document.getElementById('caption' + card.id) : null;
+    var footerHint = document.getElementById('footer' + card.id);
+    var ctx = canvas.getContext('2d');
+    var drawing = false;
+    var revealed = false;
+    var prevX = null;
+    var prevY = null;
+
+    function setup() {
+      var w = zone.offsetWidth;
+      var h = zone.offsetHeight;
+      if (w === 0 || h === 0) return;
+      var dpr = window.devicePixelRatio || 1;
+
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Gold gradient
+      var g = ctx.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, '#b8952a');
+      g.addColorStop(0.3, '#f5d76e');
+      g.addColorStop(0.5, '#d4af37');
+      g.addColorStop(0.7, '#e8c84a');
+      g.addColorStop(1, '#c5a028');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+
+      // Grain
+      var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      var d = img.data;
+      for (var i = 0; i < d.length; i += 4) {
+        var n = (Math.random() - 0.5) * 28;
+        d[i] += n; d[i+1] += n; d[i+2] += n;
+      }
+      ctx.putImageData(img, 0, 0);
+
+      // Pattern
+      ctx.save();
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = '#fff';
+      ctx.font = '13px Georgia, serif';
+      ctx.textAlign = 'center';
+      for (var y = 24; y < h; y += 26) {
+        for (var x = 0; x < w; x += 110) {
+          ctx.fillText('\u2726 SURPRISE \u2726', x + ((Math.floor(y / 26)) % 2 ? 55 : 0), y);
+        }
+      }
+      ctx.restore();
+
+      // Center hint
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#1a1610';
+      ctx.font = 'bold 18px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\uD83E\uDE99  Gratte ici  \uD83E\uDE99', w / 2, h / 2);
+      ctx.restore();
+    }
+
+    function coords(e) {
+      var r = canvas.getBoundingClientRect();
+      var t = e.touches ? e.touches[0] : e;
+      return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
+
+    function scratchAt(x, y) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 24, 0, Math.PI * 2);
+      ctx.fill();
+      if (prevX !== null) {
+        ctx.lineWidth = 48;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+      prevX = x;
+      prevY = y;
+    }
+
+    function checkPercent() {
+      if (revealed) return;
+      var w = zone.offsetWidth;
+      var h = zone.offsetHeight;
+      var dpr = window.devicePixelRatio || 1;
+      var data = ctx.getImageData(0, 0, w * dpr, h * dpr).data;
+      var clear = 0;
+      var total = 0;
+      for (var i = 3; i < data.length; i += 16) {
+        total++;
+        if (data[i] < 128) clear++;
+      }
+      if (clear / total > 0.40) reveal();
+    }
+
+    function reveal() {
+      revealed = true;
+      canvas.style.transition = 'opacity 0.7s ease';
+      canvas.style.opacity = '0';
+      secret.classList.add('show');
+      if (caption) caption.classList.add('show');
+      footerHint.classList.add('hide');
+      setTimeout(function() { canvas.style.display = 'none'; }, 700);
+
+      // Confetti on final card only
+      if (card.isFinal && !confettiFired) {
+        confettiFired = true;
+        fireConfetti();
+        playRevealMusic();
+      }
+    }
+
+    function onStart(e) { e.preventDefault(); drawing = true; var p = coords(e); prevX = p.x; prevY = p.y; scratchAt(p.x, p.y); }
+    function onMove(e)  { e.preventDefault(); if (!drawing) return; var p = coords(e); scratchAt(p.x, p.y); }
+    function onEnd(e)   { e.preventDefault(); drawing = false; prevX = prevY = null; checkPercent(); }
+
+    canvas.addEventListener('mousedown', onStart);
+    canvas.addEventListener('mousemove', onMove);
+    canvas.addEventListener('mouseup', onEnd);
+    canvas.addEventListener('mouseleave', onEnd);
+    canvas.addEventListener('touchstart', onStart, { passive: false });
+    canvas.addEventListener('touchmove', onMove, { passive: false });
+    canvas.addEventListener('touchend', onEnd, { passive: false });
+
+    if (document.readyState === 'complete') {
+      setup();
+    } else {
+      window.addEventListener('load', setup);
+    }
+    window.addEventListener('resize', function() { if (!revealed) setup(); });
+  });
+
+  // Music
+  function playRevealMusic() {
+    var audio = document.getElementById('revealMusic');
+    audio.volume = 0;
+    audio.play().then(function() {
+      // Fade in over 1 second
+      var fadeIn = setInterval(function() {
+        if (audio.volume < 0.9) {
+          audio.volume = Math.min(1, audio.volume + 0.05);
+        } else {
+          clearInterval(fadeIn);
+        }
+      }, 50);
+
+      // Fade out after 20 seconds
+      setTimeout(function() {
+        var fadeOut = setInterval(function() {
+          if (audio.volume > 0.05) {
+            audio.volume = Math.max(0, audio.volume - 0.03);
+          } else {
+            audio.pause();
+            clearInterval(fadeOut);
+          }
+        }, 80);
+      }, 20000);
+    }).catch(function() {
+      // Autoplay blocked — ignore silently
+    });
+  }
+
+  // Confetti
+  function fireConfetti() {
+    confettiEl.width = window.innerWidth;
+    confettiEl.height = window.innerHeight;
+
+    var colors = ['#f5d76e','#d4af37','#c5a028','#fff8dc','#e8c84a','#ffffff','#b8952a','#ff69b4','#87ceeb'];
+    var pieces = [];
+    for (var i = 0; i < 200; i++) {
+      pieces.push({
+        x: Math.random() * confettiEl.width,
+        y: -10 - Math.random() * 400,
+        w: 3 + Math.random() * 7,
+        h: 7 + Math.random() * 12,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        r: Math.random() * 360,
+        rs: (Math.random() - 0.5) * 10,
+        vx: (Math.random() - 0.5) * 5,
+        vy: 2 + Math.random() * 5,
+        o: 0.85 + Math.random() * 0.15
+      });
+    }
+
+    var t = 0;
+    function loop() {
+      confettiCtx.clearRect(0, 0, confettiEl.width, confettiEl.height);
+      var alive = false;
+      for (var i = 0; i < pieces.length; i++) {
+        var p = pieces[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.04;
+        p.r += p.rs;
+        if (t > 80) p.o -= 0.005;
+        if (p.o > 0 && p.y < confettiEl.height + 40) {
+          alive = true;
+          confettiCtx.save();
+          confettiCtx.translate(p.x, p.y);
+          confettiCtx.rotate(p.r * Math.PI / 180);
+          confettiCtx.globalAlpha = Math.max(0, p.o);
+          confettiCtx.fillStyle = p.c;
+          confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          confettiCtx.restore();
+        }
+      }
+      t++;
+      if (alive) requestAnimationFrame(loop);
+    }
+    loop();
+  }
+})();
+</script>
+
+</body>
+</html>
